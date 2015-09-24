@@ -32,7 +32,11 @@ def walkFiles():
                 audioFiles.append(os.path.join(root,filename))
 
 def playVideo(idx):
-    print("fake %s %d" % (sys._getframe().f_code.co_name, idx))
+    if (len(videoFiles) > idx):
+        video = videoFiles[idx]
+    else:
+        video = "N/A"
+    print("fake %s %d %s" % (sys._getframe().f_code.co_name, idx, video))
 
 def playMusic(idx):
     print("fake %s %d" % (sys._getframe().f_code.co_name, idx))
