@@ -11,11 +11,25 @@ import os, json
 import sys
 import ibmiotf.application
 
+client = None
+
 currentVideo = -1
 currentMusic = -1
 currentPicture = -1
 
-client = None
+pictureFiles = []
+videoFiles = []
+audioFiles = []
+
+def walkFiles():
+    for root, dirs, files in os.walk('/storage'):
+        for filename in files:
+            if filename.endswith(('.jpg', '.jpeg')):
+                pictureFiles.append(os.path.join(root,filename))
+            if filename.endswith(('.mov', '.mp4', '.3gp')):
+                videoFiles.append(os.path.join(root,filename))
+            if filename.endswith(('.ogg', '.mp3')):
+                audioFiles.append(os.path.join(root,filename))
 
 def playVideo(idx):
     print("fake %s %d" % (sys._getframe().f_code.co_name, idx))
@@ -69,6 +83,15 @@ def myCommandCallback(cmd):
     else:
         idx = 0
     handle(cmd.event, idx)
+
+
+walkFiles()
+print videoFiles
+print '-------------------------------------'
+print audioFiles
+print '-------------------------------------'
+print pictureFiles
+
 
 try:
     options = ibmiotf.application.ParseConfigFile("device.cfg")
