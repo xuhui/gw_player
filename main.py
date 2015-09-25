@@ -3,7 +3,7 @@
 #qpy:console
 
 '''
-hi there
+2015-09-25 : video play works, picture not work, music not implemented yet. so, clear the code for more readable
 '''
 
 import site
@@ -14,100 +14,49 @@ from subprocess import Popen
 import ibmiotf.application
 
 client = None
-
 currentVideo = -1
-currentMusic = -1
-currentPicture = -1
-
-pictureFiles = []
 videoFiles = []
-audioFiles = []
 
 def walkFiles():
     for root, dirs, files in os.walk('/storage'):
         for filename in files:
-            if filename.endswith(('.jpg', '.jpeg')):
-                pictureFiles.append(os.path.join(root,filename))
             if filename.endswith(('.mov', '.mp4', '.3gp')):
                 videoFiles.append(os.path.join(root,filename))
-            if filename.endswith(('.ogg', '.mp3')):
-                audioFiles.append(os.path.join(root,filename))
 
-def sysPlayVideFile(theVideo):
-  cmd = []
-  cmd.append('am')
-  cmd.append('start')
-  cmd.append('-n')
-  cmd.append('com.android.gallery3d/.app.MovieActivity')
-  cmd.append('-d')
-  cmd.append(theVideo)
-  Popen(cmd)
-  return
+def sysPlayVideoFile(theVideo):
+    cmd = []
+    cmd.append('am')
+    cmd.append('start')
+    cmd.append('-n')
+    cmd.append('com.android.gallery3d/.app.MovieActivity')
+    cmd.append('-d')
+    cmd.append(theVideo)
+    Popen(cmd)
+    return
 
-def sysShowPictureFile(thePicture):
-  cmd = []
-  cmd.append('am')
-  cmd.append('start')
-  cmd.append('-n')
-  cmd.append('com.android.gallery3d/PhotoView')
-  cmd.append('-a')
-  cmd.append('android.intent.action.VIEW')
-  cmd.append('-t')
-  cmd.append('image/*')
-  cmd.append('-d')
-  cmd.append(thePicture)
-  Popen(cmd)
-  return
+def stopVideo(fake):
+    cmd = []
+    cmd.append('am')
+    cmd.append('force-stop')
+    cmd.append('com.android.gallery3d')
+    Popen(cmd)
+    return
 
+def cntVideo(fake):
+    return
 
-
-def playVideo(idx):
+def playVideoByIndex(idx):
     if (len(videoFiles) > idx):
         video = videoFiles[idx]
-        sysPlayVideFile(video)
+        sysPlayVideoFile(video)
     else:
         video = "N/A"
     print("fake %s %d %s" % (sys._getframe().f_code.co_name, idx, video))
 
-def playMusic(idx):
-    print("fake %s %d" % (sys._getframe().f_code.co_name, idx))
-
-def showPicture(idx):
-    if (len(pictureFiles) > idx):
-        pic = pictureFiles[idx]
-        sysShowPictureFile(pic)
-    else:
-        pic = "N/A"
-    print("fake %s %d %s" % (sys._getframe().f_code.co_name, idx, pic))
-
-def nextVideo(idx):
-    print("fake %s %d" % (sys._getframe().f_code.co_name, idx))
-
-def nextMusic(idx):
-    print("fake %s %d" % (sys._getframe().f_code.co_name, idx))
-
-def nextPicture(idx):
-    print("fake %s %d" % (sys._getframe().f_code.co_name, idx))
-
-def cntVideo(idx):
-    print("fake %s %d" % (sys._getframe().f_code.co_name, idx))
-
-def cntMusic(idx):
-    print("fake %s %d" % (sys._getframe().f_code.co_name, idx))
-
-def cntPicture(idx):
-    print("fake %s %d" % (sys._getframe().f_code.co_name, idx))
-
 cases = {
-    "playVideo"     : playVideo,
-    "playMusic"     : playMusic,
-    "showPicture"   : showPicture,
-    "nextVideo"     : nextVideo,
-    "nextMusic"     : nextMusic,
-    "nextPicture"   : nextPicture,
+    "playVideo"     : playVideoByIndex,
+    "stopVideo"        : stopVideo,
     "cntVideo"      : cntVideo,
-    "cntMusic"      : cntMusic,
-    "cntPicture"    : cntPicture,
 }
 
 def handle(cmd, idx = 0):
@@ -125,33 +74,27 @@ def myCommandCallback(cmd):
     handle(cmd.event, idx)
 
 def player():
-	walkFiles()
-	print 'FOUND VIDEO>>'
-	print videoFiles
-	print 'FOUND MUSIC>>'
-	print audioFiles
-	print 'FOUND PICTURE>>'
-	print pictureFiles
+    walkFiles()
+    print 'FOUND VIDEO>>'
+    print videoFiles
 
+    try:
+        options = ibmiotf.application.ParseConfigFile("/storage/ext/usb1/blue/device.cfg")
+        options["deviceId"] = options["id"]
+        options["id"] = "aaa" + options["id"]
+        client = ibmiotf.application.Client(options)
+        client.connect()
+        client.deviceEventCallback = myCommandCallback
+        client.subscribeToDeviceEvents()
 
-	try:
-		options = ibmiotf.application.ParseConfigFile("/storage/ext/usb1/blue/device.cfg")
-		options["deviceId"] = options["id"]
-		options["id"] = "aaa" + options["id"]
-		client = ibmiotf.application.Client(options)
-		client.connect()
-		client.deviceEventCallback = myCommandCallback
-		client.subscribeToDeviceEvents()
+        i = 1
+        while True:
+            time.sleep(5)
+            print "waiting.. %d" % i
+            i = i + 1
 
-		i = 1
-		while True:
-			time.sleep(5)
-			print "waiting.. %d" % i
-			i = i + 1
-
-	except ibmiotf.ConnectionException  as e:
-		print e
-
+    except ibmiotf.ConnectionException  as e:
+        print e
 
 if __name__ == '__main__':
-	player()
+    player()
