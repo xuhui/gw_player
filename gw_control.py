@@ -32,11 +32,11 @@ try:
     while True:
         myData = {}
         try:
-            event, idx = raw_input("pls input your an event(idx) =>").split()
+            event, idx = raw_input("[push event to control] please input an event(idx) => ").split()
             myData["idx"] = int(float(idx))
             client.publishEvent("gowarrior", deviceId, event, "json", myData)
         except ValueError as e:
-            print "Error"
+            print "Error, only [playVideo N], [stopVideo N] are supported"
 
 except ibmiotf.ConnectionException as e:
     print e
