@@ -124,29 +124,34 @@ def myCommandCallback(cmd):
         idx = 0
     handle(cmd.event, idx)
 
+def player():
+	walkFiles()
+	print 'FOUND VIDEO>>'
+	print videoFiles
+	print 'FOUND MUSIC>>'
+	print audioFiles
+	print 'FOUND PICTURE>>'
+	print pictureFiles
 
-walkFiles()
-print 'FOUND VIDEO>>'
-print videoFiles
-print 'FOUND MUSIC>>'
-print audioFiles
-print 'FOUND PICTURE>>'
-print pictureFiles
+
+	try:
+		options = ibmiotf.application.ParseConfigFile("/storage/ext/usb1/blue/device.cfg")
+		options["deviceId"] = options["id"]
+		options["id"] = "aaa" + options["id"]
+		client = ibmiotf.application.Client(options)
+		client.connect()
+		client.deviceEventCallback = myCommandCallback
+		client.subscribeToDeviceEvents()
+
+		i = 1
+		while True:
+			time.sleep(5)
+			print "waiting.. %d" % i
+			i = i + 1
+
+	except ibmiotf.ConnectionException  as e:
+		print e
 
 
-try:
-    options = ibmiotf.application.ParseConfigFile("/storage/ext/usb1/blue/device.cfg")
-    options["deviceId"] = options["id"]
-    options["id"] = "aaa" + options["id"]
-    client = ibmiotf.application.Client(options)
-    client.connect()
-    client.deviceEventCallback = myCommandCallback
-    client.subscribeToDeviceEvents()
-
-    while True:
-        time.sleep(5)
-       	print "waiting.."
-
-except ibmiotf.ConnectionException  as e:
-    print e
-
+if __name__ == '__main__':
+	player()
