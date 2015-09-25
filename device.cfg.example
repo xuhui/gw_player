@@ -1,0 +1,7 @@
+[application]
+org=your_org
+type=your_type
+id=your_id
+auth-method=apikey
+auth-key=your_key
+auth-token=your_token
